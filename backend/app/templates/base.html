@@ -3,36 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Recipe App{% endblock %}</title>
+    <title>{% block title %}Recetario AI{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .navbar { margin-bottom: 20px; }
-        .card { margin-bottom: 20px; }
-    </style>
+    <link rel="stylesheet" href="/static/memphis.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Decorative Elements -->
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="/">Recetario AI</a>
+            <a class="navbar-brand" href="/">🍳 RECETARIO IA</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/dashboard">Panel</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/inventory">Inventario</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/recipes">Mis Recetas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout">Cerrar Sesión</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">📊 Panel</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/inventory">📦 Inventario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/recipes">🍽️ Mis Recetas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">🚪 Cerrar Sesión</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
+    <!-- Main Content -->
     <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

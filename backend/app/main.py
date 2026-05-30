@@ -20,13 +20,41 @@ app.add_middleware(
 )
 
 # Montar archivos estáticos (CSS, JS, imágenes)
-app.mount("/static", StaticFiles(directory="./app/static"), name="static")
+import os
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Configurar Jinja2Templates
-templates = Jinja2Templates(directory="./app/templates")
+templates_dir = os.path.join(os.path.dirname(__file__), "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Recipe App!"}
+from fastapi import Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return RedirectResponse(url="/login")
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    # Reutilizamos el login para simplificar la demo o podrías crear register.html
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    return templates.TemplateResponse("inventory.html", {"request": request, "ingredients": []})
+
+@app.get("/inventory", response_class=HTMLResponse)
+async def inventory_page(request: Request):
+    return templates.TemplateResponse("inventory.html", {"request": request, "ingredients": []})
+
+@app.get("/recipes", response_class=HTMLResponse)
+async def recipes_page(request: Request):
+    return templates.TemplateResponse("recipes.html", {"request": request, "recipes": []})
+
