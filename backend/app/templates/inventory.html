@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Inventario - Recipe App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Añadir Ingrediente</h5>
+                <form id="add-ingredient-form">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="nombre" placeholder="Nombre (ej: Pollo)" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="cantidad" placeholder="Cantidad (ej: 500g)" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Añadir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5>Mi Inventario</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredient-list">
+                        {% for ingredient in ingredients %}
+                        <tr>
+                            <td>{{ ingredient.nombre }}</td>
+                            <td>{{ ingredient.cantidad }}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteIngredient({{ ingredient.id }})">Eliminar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button class="btn btn-primary" onclick="generateRecipe()">Generar Receta con IA</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function deleteIngredient(id) {
+        if (confirm('¿Estás seguro?')) {
+            const response = await fetch(`/api/v1/ingredients/${id}`, { method: 'DELETE' });
+            if (response.ok) location.reload();
+        }
+    }
+
+    async function generateRecipe() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Generando...';
+        const response = await fetch('/api/v1/recipes/generate', { method: 'POST' });
+        if (response.ok) {
+            alert('¡Receta generada con éxito!');
+            window.location.href = '/recipes';
+        } else {
+            alert('Error al generar la receta');
+            btn.disabled = false;
+            btn.innerText = 'Generar Receta con IA';
+        }
+    }
+</script>
+{% endblock %}

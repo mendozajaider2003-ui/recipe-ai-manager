@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./backend
+    container_name: recipe_app_container
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+    restart: always
+
+# Nota: La base de datos es externa según los requisitos.
+# Asegúrate de que DATABASE_URL en el archivo .env apunte a tu instancia externa.
