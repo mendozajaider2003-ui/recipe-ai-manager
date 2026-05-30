@@ -58,3 +58,94 @@ async def inventory_page(request: Request):
 async def recipes_page(request: Request):
     return templates.TemplateResponse("recipes.html", {"request": request, "recipes": []})
 
+@app.post("/login")
+async def login_post(request: Request):
+    """Procesar formulario de login."""
+    try:
+        form = await request.form()
+        email = form.get("username")
+        password = form.get("password")
+        
+        # Aquí iría la lógica de autenticación real
+        # Por ahora, redirigir al inventario
+        return RedirectResponse(url="/inventory", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/login", status_code=303)
+
+@app.post("/register")
+async def register_post(request: Request):
+    """Procesar formulario de registro."""
+    try:
+        form = await request.form()
+        email = form.get("email")
+        password = form.get("password")
+        nombre = form.get("nombre")
+        
+        # Aquí iría la lógica de registro real
+        # Por ahora, redirigir al login
+        return RedirectResponse(url="/login", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/register", status_code=303)
+
+@app.post("/inventory")
+async def add_ingredient(request: Request):
+    """Añadir un ingrediente al inventario."""
+    try:
+        form = await request.form()
+        nombre = form.get("nombre")
+        cantidad = form.get("cantidad")
+        
+        # Aquí iría la lógica para guardar el ingrediente
+        # Por ahora, redirigir al inventario
+        return RedirectResponse(url="/inventory", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/inventory", status_code=303)
+
+@app.post("/inventory/delete/{ingredient_id}")
+async def delete_ingredient(ingredient_id: int, request: Request):
+    """Eliminar un ingrediente del inventario."""
+    try:
+        # Aquí iría la lógica para eliminar el ingrediente
+        # Por ahora, redirigir al inventario
+        return RedirectResponse(url="/inventory", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/inventory", status_code=303)
+
+@app.get("/generate-recipe")
+async def generate_recipe_page(request: Request):
+    """Generar una receta con IA."""
+    try:
+        # Aquí iría la lógica para generar la receta
+        # Por ahora, redirigir a las recetas
+        return RedirectResponse(url="/recipes", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/inventory", status_code=303)
+
+@app.post("/recipes/delete/{recipe_id}")
+async def delete_recipe(recipe_id: int, request: Request):
+    """Eliminar una receta del historial."""
+    try:
+        # Aquí iría la lógica para eliminar la receta
+        # Por ahora, redirigir a las recetas
+        return RedirectResponse(url="/recipes", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/recipes", status_code=303)
+
+@app.post("/recipes/{recipe_id}/rate")
+async def rate_recipe(recipe_id: int, request: Request):
+    """Calificar una receta."""
+    try:
+        data = await request.json()
+        puntuacion = data.get("puntuacion")
+        
+        # Aquí iría la lógica para guardar la calificación
+        # Por ahora, redirigir a las recetas
+        return RedirectResponse(url="/recipes", status_code=303)
+    except Exception as e:
+        return RedirectResponse(url="/recipes", status_code=303)
+
+@app.get("/logout")
+async def logout():
+    """Cerrar sesión."""
+    return RedirectResponse(url="/login", status_code=303)
+
