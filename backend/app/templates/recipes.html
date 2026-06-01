@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Recetas - Recetario AI{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🍽️ Mis Recetas</h1>
+    <p>Historial de recetas generadas con IA</p>
+    <div class="decorative-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+</div>
+
+{% if recetas %}
+    <div class="row">
+        {% for receta in recetas %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">{{ receta.nombre }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <span class="badge badge-primary">⏱️ {{ receta.tiempo }} min</span>
+                            <span class="badge badge-success">📊 {{ receta.dificultad }}</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>🥘 Ingredientes:</h6>
+                            <ul>
+                                {% set ingredientes_list = receta.ingredientes_json %}
+                                {% if ingredientes_list is string %}
+                                    {% set ingredientes_list = ingredientes_list | from_json %}
+                                {% endif %}
+                                {% for ing in ingredientes_list[:3] %}
+                                    <li>{{ ing }}</li>
+                                {% endfor %}
+                                {% if ingredientes_list|length > 3 %}
+                                    <li>+ {{ ingredientes_list|length - 3 }} más...</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="/recipes/{{ receta.id }}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                            <form method="POST" action="/recipes/delete/{{ receta.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm w-100">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card text-center">
+        <div class="card-body">
+            <h3>📭 No hay recetas aún</h3>
+            <p>Genera tu primera receta desde el inventario</p>
+            <a href="/inventory" class="btn btn-primary">Ir al Inventario</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

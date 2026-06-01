@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Inventario - Recetario AI{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>📦 Mi Inventario</h1>
+    <p>Gestiona tus ingredientes y crea recetas deliciosas</p>
+    <div class="decorative-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">➕ Añadir Ingrediente</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/inventory">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">🥘 Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Tomate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">📏 Cantidad</label>
+                        <input type="text" class="form-control" id="cantidad" name="cantidad" placeholder="Ej: 500g" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        ✨ Añadir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">🛒 Mis Ingredientes</h3>
+            </div>
+            <div class="card-body">
+                {% if ingredientes %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ingrediente</th>
+                                    <th>Cantidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ing in ingredientes %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ ing.nombre }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-warning">{{ ing.cantidad }}</span>
+                                        </td>
+                                        <td>
+                                            <form method="POST" action="/inventory/delete/{{ ing.id }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este ingrediente?')">
+                                                    🗑️ Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="/generate-recipe" class="btn btn-primary w-100" style="padding: 15px; font-size: 16px;">
+                            🤖 ✨ Generar Receta con IA
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <p style="font-size: 18px; font-weight: 700; color: #999;">
+                            📭 No hay ingredientes aún
+                        </p>
+                        <p style="font-weight: 600; color: #999;">
+                            Añade ingredientes para comenzar
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

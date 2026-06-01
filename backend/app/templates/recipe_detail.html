@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ receta.nombre }} - Recetario AI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{ receta.nombre }}</h1>
+            <p>⏱️ {{ receta.tiempo }} min | 📊 {{ receta.dificultad }}</p>
+        </div>
+        <div class="card-body">
+            <h3>🥘 Ingredientes</h3>
+            <ul>
+                {% for ing in receta.ingredientes_json %}
+                    <li>{{ ing }}</li>
+                {% endfor %}
+            </ul>
+            <h3>📝 Pasos</h3>
+            <ol>
+                {% for paso in receta.pasos_json %}
+                    <li>{{ paso }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div class="card-footer">
+            <a href="/recipes" class="btn btn-secondary">← Volver</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
