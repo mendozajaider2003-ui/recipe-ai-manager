@@ -247,3 +247,4 @@ No hay rate limiting implementado actualmente.
 
 La API está versionada en `/api/v1`. Futuras versiones estarán disponibles en `/api/v2`, etc.
 # Commit 4 - Índices BD
+# Laura - Colores
