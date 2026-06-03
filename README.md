@@ -37,3 +37,4 @@ docker exec -it recipe_app_container python init_db.py
   - `app/templates/`: Vistas HTML con Jinja2.
   - `app/core/`: Configuración, seguridad y LLM.
 - `docker-compose.yml`: Orquestación de contenedores.
+# Commit 7 - Rate Limiting
