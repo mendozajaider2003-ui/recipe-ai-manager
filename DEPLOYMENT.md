@@ -128,3 +128,4 @@ docker-compose up --build --no-cache
 - Configurar CORS apropiadamente
 - Usar variables de entorno para credenciales
 - Mantener dependencias actualizadas
+# Commit 5 - Validación Email
