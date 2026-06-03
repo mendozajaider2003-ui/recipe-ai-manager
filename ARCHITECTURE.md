@@ -175,3 +175,4 @@ Cada entidad (Usuario, Ingrediente, Receta, Calificación) tiene:
 - Cobertura de endpoints
 - Pruebas de CRUD
 - Pruebas de integración LLM
+# Commit 3 - Cache de Recetas
