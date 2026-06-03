@@ -176,3 +176,4 @@ Cada entidad (Usuario, Ingrediente, Receta, Calificación) tiene:
 - Pruebas de CRUD
 - Pruebas de integración LLM
 # Commit 3 - Cache de Recetas
+# Laura - Responsive
