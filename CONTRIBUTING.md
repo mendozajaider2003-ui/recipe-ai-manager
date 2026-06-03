@@ -44,3 +44,4 @@ Todos los PRs serán revisados antes de ser mergeados. Asegúrate de:
 
 ¡Gracias por contribuir! 🙌
 # Commit 9 - Validación Recetas
+# Laura - Notificaciones
