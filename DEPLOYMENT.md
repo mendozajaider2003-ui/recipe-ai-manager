@@ -129,3 +129,4 @@ docker-compose up --build --no-cache
 - Usar variables de entorno para credenciales
 - Mantener dependencias actualizadas
 # Commit 5 - Validación Email
+# Laura - Iconos
