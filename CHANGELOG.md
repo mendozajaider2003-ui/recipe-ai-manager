@@ -46,3 +46,4 @@ Cuando contribuyas, asegúrate de:
 1. Actualizar el CHANGELOG.md con tus cambios
 2. Usar los tipos de cambios listados arriba
 3. Incluir referencias a issues si es aplicable
+# Commit 8 - Compresión
