@@ -283,3 +283,4 @@ Si el problema persiste:
    - Logs relevantes
    - Versión de Docker
    - Sistema operativo
+# Commit 6 - Logs
