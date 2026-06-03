@@ -172,3 +172,4 @@
 - Estructura clara y organizada
 - Fácil de mantener y extender
 # Daniela - Optimización de Ingredientes
+# Laura - Interfaz de Usuario
