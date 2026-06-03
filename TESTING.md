@@ -185,3 +185,4 @@ Abrir `htmlcov/index.html` en el navegador
 7. Usar mocks para dependencias externas
 8. Documentar tests complejos
 # Commit 2 - Validación de Ingredientes
+# Laura - Animaciones
