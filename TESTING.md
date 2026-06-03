@@ -184,3 +184,4 @@ Abrir `htmlcov/index.html` en el navegador
 6. Limpiar datos después de cada test
 7. Usar mocks para dependencias externas
 8. Documentar tests complejos
+# Commit 2 - Validación de Ingredientes
