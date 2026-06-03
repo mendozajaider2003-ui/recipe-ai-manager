@@ -284,3 +284,4 @@ Si el problema persiste:
    - Versión de Docker
    - Sistema operativo
 # Commit 6 - Logs
+# Laura - Accesibilidad
