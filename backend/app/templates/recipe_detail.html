@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ receta.nombre }} - Recetario AI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">{{ receta.nombre }}</h1>
+            <div class="mt-2">
+                <span class="badge badge-primary">⏱️ {{ receta.tiempo }} min</span>
+                <span class="badge badge-success">📊 {{ receta.dificultad }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>🥘 Ingredientes</h3>
+                    <ul>
+                        {% for ing in ingredientes %}
+                            <li>{{ ing }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3>📝 Pasos</h3>
+                    <ol>
+                        {% for paso in pasos %}
+                            <li>{{ paso }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="/recipes" class="btn btn-primary">← Volver a Mis Recetas</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

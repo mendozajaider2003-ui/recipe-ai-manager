@@ -23,14 +23,17 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <span class="badge badge-primary">⏱️ {{ receta.tiempo }}</span>
+                            <span class="badge badge-primary">⏱️ {{ receta.tiempo }} min</span>
                             <span class="badge badge-success">📊 {{ receta.dificultad }}</span>
                         </div>
 
                         <div class="mb-3">
-                            <h6 style="font-weight: 700; text-transform: uppercase;">Ingredientes:</h6>
-                            <ul style="font-size: 14px; margin-bottom: 0;">
-                                {% set ingredientes_list = receta.ingredientes_json if receta.ingredientes_json is iterable else [] %}
+                            <h6 style="font-weight: 700;">🥘 Ingredientes:</h6>
+                            <ul style="font-size: 14px;">
+                                {% set ingredientes_list = receta.ingredientes_json %}
+                                {% if ingredientes_list is string %}
+                                    {% set ingredientes_list = ingredientes_list | from_json %}
+                                {% endif %}
                                 {% for ing in ingredientes_list[:3] %}
                                     <li>{{ ing }}</li>
                                 {% endfor %}
@@ -40,18 +43,23 @@
                             </ul>
                         </div>
 
-                        <div class="mb-3">
-                            <h6 style="font-weight: 700; text-transform: uppercase;">Calificación:</h6>
-                            <div class="star-rating">
-                                {% for i in range(1, 6) %}
-                                    <span class="star" 
-                                          onclick="rateRecipe({{ receta.id }}, {{ i }})"
-                                          style="cursor: pointer;">
-                                        ⭐
-                                    </span>
-                                {% endfor %}
-                            </div>
-                        </div>
+                        <!-- ========== CALIFICACIÓN CON ESTRELLAS ========== -->
+               
+<div class="mb-3">
+    <h6 style="font-weight: 700;">⭐ Calificación:</h6>
+    <div class="star-rating">
+        {% set calificacion = receta.calificacion_promedio if receta.calificacion_promedio else 0 %}
+        {% for i in range(1, 6) %}
+            <span class="star" 
+                  onclick="rateRecipe({{ receta.id }}, {{ i }})"
+                  style="cursor: pointer; font-size: 24px; 
+                         {% if i <= calificacion %}color: #FFD700;{% else %}color: #ccc;{% endif %}">
+                ★
+            </span>
+        {% endfor %}
+    </div>
+</div>                        
+
 
                         <div class="d-grid gap-2">
                             <a href="/recipes/{{ receta.id }}" class="btn btn-primary btn-sm">
@@ -72,20 +80,16 @@
     <div class="card text-center">
         <div class="card-body" style="padding: 60px 20px;">
             <p style="font-size: 24px; margin-bottom: 20px;">📭</p>
-            <h5 style="font-weight: 700; font-size: 18px; margin-bottom: 15px;">No hay recetas aún</h5>
-            <p style="font-weight: 600; color: #999; margin-bottom: 20px;">
-                Crea tu primer receta generada con IA
-            </p>
-            <a href="/inventory" class="btn btn-primary">
-                📦 Ir al Inventario
-            </a>
+            <h5 style="font-weight: 700;">No hay recetas aún</h5>
+            <p style="color: #999;">Genera tu primera receta desde el inventario</p>
+            <a href="/inventory" class="btn btn-primary">📦 Ir al Inventario</a>
         </div>
     </div>
 {% endif %}
 
 <script>
-function rateRecipe(recetaId, puntuacion) {
-    fetch(`/recipes/${recetaId}/rate`, {
+function rateRecipe(recipeId, puntuacion) {
+    fetch(`/recipes/${recipeId}/rate`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -94,11 +98,16 @@ function rateRecipe(recetaId, puntuacion) {
     })
     .then(response => {
         if (response.ok) {
-            alert('¡Receta calificada exitosamente!');
+            alert('¡Receta calificada con ' + puntuacion + ' estrellas!');
             location.reload();
+        } else {
+            alert('Error al calificar la receta');
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al calificar');
+    });
 }
 </script>
 {% endblock %}

@@ -12,9 +12,8 @@ from .core.config import settings
 from .dependencies import get_db
 from .crud.crud_user import user as crud_user
 from .crud import ingredient as crud_ingredient, recipe as crud_recipe, rating as crud_rating
-from .core.security import create_access_token, verify_password, get_password_hash
-from .schemas import UserCreate, IngredientCreate, RatingCreate
-from .models.models import User
+from .core.security import create_access_token
+from .schemas import UserCreate, IngredientCreate, RatingCreate, RecipeCreate
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -38,14 +37,10 @@ if os.path.exists(static_dir):
 templates_dir = os.path.join(os.path.dirname(__file__), "templates")
 templates = Jinja2Templates(directory=templates_dir)
 
-# Incluir routers de API
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
-# ========== FUNCIONES AUXILIARES ==========
-
 def get_user_from_token(request: Request, db: Session):
-    """Obtener usuario desde la cookie"""
     token = request.cookies.get("access_token")
     if not token:
         return None
@@ -59,17 +54,22 @@ def get_user_from_token(request: Request, db: Session):
         return None
 
 
-# ========== RUTAS FRONTEND ==========
+# ========== PÁGINAS LIMPIAS (SIN NAVBAR) ==========
+
+@app.get("/login_clean", response_class=HTMLResponse)
+async def login_clean_page(request: Request, error: str = None):
+    return templates.TemplateResponse("login_clean.html", {"request": request, "error": error})
+
+@app.get("/register_clean", response_class=HTMLResponse)
+async def register_clean_page(request: Request, error: str = None):
+    return templates.TemplateResponse("register_clean.html", {"request": request, "error": error})
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    return RedirectResponse(url="/login")
+    return RedirectResponse(url="/login_clean")
 
 
-@app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, error: str = None):
-    return templates.TemplateResponse("login.html", {"request": request, "error": error})
-
+# ========== RUTAS DE AUTENTICACIÓN ==========
 
 @app.post("/login")
 async def login_post(
@@ -81,19 +81,13 @@ async def login_post(
     user = crud_user.authenticate(db, email=username, password=password)
     if not user:
         return templates.TemplateResponse(
-            "login.html", 
+            "login_clean.html", 
             {"request": request, "error": "Email o contraseña incorrectos"}
         )
     access_token = create_access_token(data={"sub": user.email})
     response = RedirectResponse(url="/inventory", status_code=303)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
     return response
-
-
-@app.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request, error: str = None):
-    return templates.TemplateResponse("register.html", {"request": request, "error": error})
-
 
 @app.post("/register")
 async def register_post(
@@ -106,26 +100,25 @@ async def register_post(
     existing_user = crud_user.get_by_email(db, email=email)
     if existing_user:
         return templates.TemplateResponse(
-            "register.html", 
+            "register_clean.html", 
             {"request": request, "error": "El email ya está registrado"}
         )
     
     user_in = UserCreate(nombre=nombre, email=email, password=password)
     crud_user.create(db, obj_in=user_in)
-    return RedirectResponse(url="/login", status_code=303)
+    return RedirectResponse(url="/login_clean", status_code=303)
 
+
+# ========== RUTAS PROTEGIDAS (REQUIEREN LOGIN) ==========
 
 @app.get("/inventory", response_class=HTMLResponse)
 async def inventory_page(request: Request, db: Session = Depends(get_db)):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     ingredientes = crud_ingredient.get_multi_by_owner(db, owner_id=user.id)
-    return templates.TemplateResponse(
-        "inventory.html", 
-        {"request": request, "ingredientes": ingredientes}
-    )
+    return templates.TemplateResponse("inventory.html", {"request": request, "ingredientes": ingredientes})
 
 
 @app.post("/inventory")
@@ -137,7 +130,7 @@ async def add_ingredient(
 ):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     ingredient_in = IngredientCreate(nombre=nombre, cantidad=cantidad)
     crud_ingredient.create_with_owner(db, obj_in=ingredient_in, owner_id=user.id)
@@ -152,9 +145,30 @@ async def delete_ingredient(
 ):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     crud_ingredient.remove(db, id=ingredient_id)
+    return RedirectResponse(url="/inventory", status_code=303)
+
+
+@app.post("/inventory/edit/{ingredient_id}")
+async def edit_ingredient(
+    ingredient_id: int,
+    request: Request,
+    nombre: str = Form(...),
+    cantidad: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = get_user_from_token(request, db)
+    if not user:
+        return RedirectResponse(url="/login_clean", status_code=303)
+    
+    ingredient = crud_ingredient.get(db, id=ingredient_id)
+    if ingredient and ingredient.usuario_id == user.id:
+        ingredient.nombre = nombre
+        ingredient.cantidad = cantidad
+        db.commit()
+    
     return RedirectResponse(url="/inventory", status_code=303)
 
 
@@ -162,20 +176,17 @@ async def delete_ingredient(
 async def recipes_page(request: Request, db: Session = Depends(get_db)):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     recetas = crud_recipe.get_multi_by_owner(db, owner_id=user.id)
-    return templates.TemplateResponse(
-        "recipes.html", 
-        {"request": request, "recetas": recetas}
-    )
+    return templates.TemplateResponse("recipes.html", {"request": request, "recetas": recetas})
 
 
 @app.get("/generate-recipe")
 async def generate_recipe(request: Request, db: Session = Depends(get_db)):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     ingredientes = crud_ingredient.get_multi_by_owner(db, owner_id=user.id)
     if not ingredientes:
@@ -186,7 +197,6 @@ async def generate_recipe(request: Request, db: Session = Depends(get_db)):
     ingredient_names = [ing.nombre for ing in ingredientes]
     recipe_data = generate_recipe_from_ingredients(ingredient_names)
     
-    from .schemas import RecipeCreate
     recipe_in = RecipeCreate(
         nombre=recipe_data["nombre"],
         ingredientes_json=recipe_data["ingredientes_json"],
@@ -207,7 +217,7 @@ async def delete_recipe(
 ):
     user = get_user_from_token(request, db)
     if not user:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url="/login_clean", status_code=303)
     
     crud_recipe.remove(db, id=recipe_id)
     return RedirectResponse(url="/recipes", status_code=303)
@@ -227,70 +237,42 @@ async def rate_recipe(
     data = json.loads(body)
     puntuacion = data.get("puntuacion")
     
-    rating_in = RatingCreate(recipe_id=recipe_id, puntuacion=puntuacion)
+    rating_in = RatingCreate(receta_id=recipe_id, puntuacion=puntuacion)
     crud_rating.create_with_owner(db, obj_in=rating_in, owner_id=user.id)
     
     return {"message": "Calificación guardada"}
 
 
+@app.get("/recipes/{recipe_id}", response_class=HTMLResponse)
+async def recipe_detail_page(request: Request, recipe_id: int, db: Session = Depends(get_db)):
+    user = get_user_from_token(request, db)
+    if not user:
+        return RedirectResponse(url="/login_clean", status_code=303)
+    
+    receta = crud_recipe.get(db, id=recipe_id)
+    if not receta:
+        return RedirectResponse(url="/recipes", status_code=303)
+    
+    ingredientes = json.loads(receta.ingredientes_json) if isinstance(receta.ingredientes_json, str) else receta.ingredientes_json
+    pasos = json.loads(receta.pasos_json) if isinstance(receta.pasos_json, str) else receta.pasos_json
+    
+    return templates.TemplateResponse(
+        "recipe_detail.html", 
+        {"request": request, "receta": receta, "ingredientes": ingredientes, "pasos": pasos}
+    )
+
+
 @app.get("/logout")
 async def logout():
-    response = RedirectResponse(url="/login")
+    response = RedirectResponse(url="/login_clean")
     response.delete_cookie("access_token")
     return response
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard_page(request: Request):
+async def dashboard_page(request: Request, db: Session = Depends(get_db)):
+    user = get_user_from_token(request, db)
+    if not user:
+        return RedirectResponse(url="/login_clean", status_code=303)
+    
     return RedirectResponse(url="/inventory")
-
-
-# ========== CREAR REGISTER.HTML SI NO EXISTE ==========
-
-register_template = """{% extends "base.html" %}
-
-{% block title %}Registro - Recetario AI{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">📝 Crear Cuenta</h3>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-                
-                <form action="/register" method="post">
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">👤 Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">📧 Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">🔑 Contraseña</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">
-                        ✨ Registrarse
-                    </button>
-                </form>
-                
-                <div class="text-center">
-                    <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}"""
-
-register_path = os.path.join(templates_dir, "register.html")
-if not os.path.exists(register_path):
-    with open(register_path, "w", encoding="utf-8") as f:
-        f.write(register_template)

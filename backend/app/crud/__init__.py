@@ -1,8 +1,9 @@
 from typing import List, Optional
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from .crud_user import user
 from ..models.models import Ingredient, Recipe, Rating
-from ..schemas import IngredientCreate, IngredientUpdate, RecipeCreate, RecipeUpdate, RatingCreate
+from ..schemas import IngredientCreate, IngredientUpdate, RecipeCreate, RatingCreate
 
 class CRUDBase:
     def __init__(self, model):
@@ -50,6 +51,24 @@ class CRUDRecipe(CRUDBase):
 
     def get_multi_by_owner(self, db: Session, *, owner_id: int, skip: int = 0, limit: int = 100) -> List[Recipe]:
         return db.query(self.model).filter(Recipe.usuario_id == owner_id).offset(skip).limit(limit).all()
+
+    def get_with_rating(self, db: Session, *, owner_id: int):
+        recipes = db.query(
+            Recipe,
+            func.coalesce(func.avg(Rating.puntuacion), 0).label('promedio')
+        ).outerjoin(
+            Rating, Recipe.id == Rating.receta_id
+        ).filter(
+            Recipe.usuario_id == owner_id
+        ).group_by(
+            Recipe.id
+        ).all()
+        
+        result = []
+        for recipe, promedio in recipes:
+            recipe.calificacion_promedio = float(promedio)
+            result.append(recipe)
+        return result
 
 class CRUDRating(CRUDBase):
     def create_with_owner(self, db: Session, *, obj_in: RatingCreate, owner_id: int) -> Rating:

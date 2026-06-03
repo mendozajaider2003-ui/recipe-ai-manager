@@ -75,13 +75,14 @@ class Recipe(RecipeBase):
         from_attributes = True
 
 # Rating schemas
+
 class RatingBase(BaseModel):
     puntuacion: Optional[int] = None
-    recipe_id: Optional[int] = None
+    receta_id: Optional[int] = None
 
 class RatingCreate(RatingBase):
+    receta_id: int
     puntuacion: int
-    recipe_id: int
 
 class Rating(RatingBase):
     id: int
