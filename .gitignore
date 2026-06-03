@@ -150,3 +150,5 @@ npm-debug.log
 .env.*.local
 *.pem
 *.key
+__pycache__/
+*.pyc
